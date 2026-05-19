@@ -12,7 +12,7 @@ body {
 
 /* ============ PASSWORD MODAL ============ */
 .modal {
-    display: none;
+    display: flex;
     position: fixed;
     top: 0;
     left: 0;
@@ -22,11 +22,11 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    animation: fadeIn 0.5s ease-in;
 }
 
-.modal.active {
-    display: flex;
-    animation: fadeIn 0.5s ease-in;
+.modal.hidden {
+    display: none !important;
 }
 
 .modal-content {
@@ -415,6 +415,10 @@ body {
 
 .bg-option.active {
     display: block;
+}
+
+.bg-option.hidden {
+    display: none !important;
 }
 
 .save-btn,
