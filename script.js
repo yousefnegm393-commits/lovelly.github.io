@@ -40,9 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadAllData();
     displayStoryContent();
     setBackground();
-    const distance =
-        now -
-        countdowndate;
+    startCountdown();
     setupParticles();
     setupAllEventListeners();
 });
