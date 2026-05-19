@@ -5,9 +5,9 @@ const STORAGE_KEYS = {
     STORY_TITLE: 'story_title',
     STORY_TEXT: 'story_text',
     STORY_IMAGES: 'story_images',
-    COUNTDOWN_TITLE: 'countdown_title',
-    COUNTDOWN_DATE: 'countdown_date',
-    COUNTDOWN_MESSAGE: 'countdown_message',
+    COUNTUP_TITLE: 'countup_title',
+    COUNTUP_START_DATE: 'countup_start_date',
+    COUNTUP_MESSAGE: 'countup_message',
     BG_TYPE: 'bg_type',
     BG_COLOR: 'bg_color',
     BG_IMAGE: 'bg_image',
@@ -26,9 +26,9 @@ const DEFAULT_DATA = {
     storyTitle: 'Our Love Story 💕',
     storyText: 'Every love story is beautiful,|but ours is my favorite.||From the moment I met you, I knew you were special.',
     storyImages: ['https://via.placeholder.com/400x300?text=Us', 'https://via.placeholder.com/400x300?text=Together'],
-    countdownTitle: 'Days Until Our Special Day 💑',
-    countdownDate: new Date(2025, 11, 31).toISOString().split('T')[0],
-    countdownMessage: '❤️ Our special day is here! ❤️',
+    countupTitle: 'Days Together 💑',
+    countupStartDate: new Date(2024, 0, 1).toISOString().split('T')[0],
+    countupMessage: '❤️ And counting! ❤️',
     bgType: 'color',
     bgColor: '#1a1a2e',
     bgImage: '',
@@ -47,7 +47,7 @@ function initializeApp() {
     loadAllData();
     displayStoryContent();
     setBackground();
-    startCountdown();
+    startCountup();
     if (DEFAULT_DATA.musicUrl) {
         playMusic();
     }
@@ -147,27 +147,26 @@ function displayStoryContent() {
     }
 }
 
-// ============ COUNTDOWN ============
-function startCountdown() {
-    const title = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_TITLE) || DEFAULT_DATA.countdownTitle;
-    const dateStr = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_DATE) || DEFAULT_DATA.countdownDate;
-    const message = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_MESSAGE) || DEFAULT_DATA.countdownMessage;
+// ============ COUNTUP ============
+function startCountup() {
+    const title = localStorage.getItem(STORAGE_KEYS.COUNTUP_TITLE) || DEFAULT_DATA.countupTitle;
+    const dateStr = localStorage.getItem(STORAGE_KEYS.COUNTUP_START_DATE) || DEFAULT_DATA.countupStartDate;
+    const message = localStorage.getItem(STORAGE_KEYS.COUNTUP_MESSAGE) || DEFAULT_DATA.countupMessage;
     
-    document.getElementById('countdownTitle').textContent = title;
-    document.getElementById('countdownMessage').textContent = '';
+    document.getElementById('countupTitle').textContent = title;
+    document.getElementById('countupMessage').textContent = message;
     
-    const targetDate = new Date(dateStr).getTime();
+    const startDate = new Date(dateStr).getTime();
     
-    function updateCountdown() {
+    function updateCountup() {
         const now = new Date().getTime();
-        const distance = targetDate - now;
+        const distance = now - startDate;
         
         if (distance < 0) {
             document.getElementById('days').textContent = '0';
             document.getElementById('hours').textContent = '0';
             document.getElementById('minutes').textContent = '0';
             document.getElementById('seconds').textContent = '0';
-            document.getElementById('countdownMessage').textContent = message;
             return;
         }
         
@@ -182,8 +181,8 @@ function startCountdown() {
         document.getElementById('seconds').textContent = seconds;
     }
     
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+    updateCountup();
+    setInterval(updateCountup, 1000);
 }
 
 // ============ BACKGROUND ============
@@ -322,9 +321,9 @@ function loadAdminPanel() {
     document.getElementById('adminStoryText').value = localStorage.getItem(STORAGE_KEYS.STORY_TEXT) || DEFAULT_DATA.storyText;
     document.getElementById('adminImages').value = (JSON.parse(localStorage.getItem(STORAGE_KEYS.STORY_IMAGES)) || DEFAULT_DATA.storyImages).join('\n');
     
-    document.getElementById('adminCountdownTitle').value = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_TITLE) || DEFAULT_DATA.countdownTitle;
-    document.getElementById('adminTargetDate').value = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_DATE) || DEFAULT_DATA.countdownDate;
-    document.getElementById('adminCountdownMessage').value = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_MESSAGE) || DEFAULT_DATA.countdownMessage;
+    document.getElementById('adminCountupTitle').value = localStorage.getItem(STORAGE_KEYS.COUNTUP_TITLE) || DEFAULT_DATA.countupTitle;
+    document.getElementById('adminStartDate').value = localStorage.getItem(STORAGE_KEYS.COUNTUP_START_DATE) || DEFAULT_DATA.countupStartDate;
+    document.getElementById('adminCountupMessage').value = localStorage.getItem(STORAGE_KEYS.COUNTUP_MESSAGE) || DEFAULT_DATA.countupMessage;
     
     document.getElementById('adminBgType').value = localStorage.getItem(STORAGE_KEYS.BG_TYPE) || DEFAULT_DATA.bgType;
     document.getElementById('adminBgColor').value = localStorage.getItem(STORAGE_KEYS.BG_COLOR) || DEFAULT_DATA.bgColor;
@@ -354,9 +353,9 @@ function saveAdminChanges() {
         const images = document.getElementById('adminImages').value.split('\n').filter(url => url.trim());
         localStorage.setItem(STORAGE_KEYS.STORY_IMAGES, JSON.stringify(images));
         
-        localStorage.setItem(STORAGE_KEYS.COUNTDOWN_TITLE, document.getElementById('adminCountdownTitle').value);
-        localStorage.setItem(STORAGE_KEYS.COUNTDOWN_DATE, document.getElementById('adminTargetDate').value);
-        localStorage.setItem(STORAGE_KEYS.COUNTDOWN_MESSAGE, document.getElementById('adminCountdownMessage').value);
+        localStorage.setItem(STORAGE_KEYS.COUNTUP_TITLE, document.getElementById('adminCountupTitle').value);
+        localStorage.setItem(STORAGE_KEYS.COUNTUP_START_DATE, document.getElementById('adminStartDate').value);
+        localStorage.setItem(STORAGE_KEYS.COUNTUP_MESSAGE, document.getElementById('adminCountupMessage').value);
         
         localStorage.setItem(STORAGE_KEYS.BG_TYPE, document.getElementById('adminBgType').value);
         localStorage.setItem(STORAGE_KEYS.BG_COLOR, document.getElementById('adminBgColor').value);
