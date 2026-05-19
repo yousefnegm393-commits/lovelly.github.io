@@ -8,11 +8,11 @@
 </head>
 <body>
     <!-- Password Modal -->
-    <div id="passwordModal" class="modal active">
+    <div id="passwordModal" class="modal">
         <div class="modal-content password-modal">
             <h2>🔐 Enter Passcode</h2>
             <input type="password" id="passcodeInput" placeholder="Enter passcode" autocomplete="off">
-            <button onclick="checkPasscode()">Enter</button>
+            <button id="enterBtn" type="button">Enter</button>
             <p id="errorMessage" class="error-message"></p>
         </div>
     </div>
@@ -20,7 +20,7 @@
     <!-- Main Love Story Page -->
     <div id="mainContent" class="hidden">
         <!-- Admin Panel Button -->
-        <button id="adminToggle" class="admin-toggle" onclick="toggleAdmin()">⚙️ Admin</button>
+        <button id="adminToggle" class="admin-toggle" type="button">⚙️ Admin</button>
 
         <!-- Background Container -->
         <div id="backgroundContainer" class="background-container">
@@ -67,7 +67,7 @@
 
     <!-- Admin Panel -->
     <div id="adminPanel" class="admin-panel hidden">
-        <button class="close-admin" onclick="toggleAdmin()">✕</button>
+        <button class="close-admin" type="button">✕</button>
         <h2>Admin Panel</h2>
         
         <div class="admin-section">
@@ -97,7 +97,7 @@
         <div class="admin-section">
             <h3>🎨 Background & Effects</h3>
             <label>Background Type:</label>
-            <select id="adminBgType" onchange="updateBgTypeOptions()">
+            <select id="adminBgType">
                 <option value="color">Solid Color</option>
                 <option value="image">Image</option>
                 <option value="video">Video</option>
@@ -129,7 +129,7 @@
 
             <label>Music URL:</label>
             <input type="text" id="adminMusicUrl" placeholder="https://music.com/song.mp3">
-            <button onclick="testMusic()">🎵 Test Music</button>
+            <button id="testMusicBtn" type="button">🎵 Test Music</button>
         </div>
 
         <div class="admin-section">
@@ -138,8 +138,8 @@
             <input type="password" id="adminPasscode" placeholder="Enter new passcode">
         </div>
 
-        <button class="save-btn" onclick="saveAdminChanges()">💾 Save All Changes</button>
-        <button class="logout-btn" onclick="logoutAdmin()">🚪 Logout</button>
+        <button id="saveBtn" class="save-btn" type="button">💾 Save All Changes</button>
+        <button id="logoutBtn" class="logout-btn" type="button">🚪 Logout</button>
     </div>
 
     <!-- Audio Element -->
