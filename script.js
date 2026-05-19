@@ -13,8 +13,7 @@ const STORAGE_KEYS = {
     BG_VIDEO: 'bg_video',
     BG_GRADIENT: 'bg_gradient',
     PARTICLES_ENABLED: 'particles_enabled',
-    MUSIC_URL: 'music_url',
-    ADMIN_AUTH: 'admin_auth'
+    MUSIC_URL: 'music_url'
 };
 
 // ============ DEFAULT DATA ============
@@ -35,31 +34,76 @@ const DEFAULT_DATA = {
     musicUrl: ''
 };
 
-// ============ INITIALIZATION ============
-window.addEventListener('load', () => {
-    initializeApp();
-});
-
-function initializeApp() {
+// ============ DOM READY ============
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing...');
     loadAllData();
     displayStoryContent();
     setBackground();
     startCountdown();
-    if (DEFAULT_DATA.musicUrl) {
-        playMusic();
-    }
     setupParticles();
-    setupEventListeners();
-}
+    setupAllEventListeners();
+});
 
-// ============ EVENT LISTENERS ============
-function setupEventListeners() {
+// ============ SETUP ALL EVENT LISTENERS ============
+function setupAllEventListeners() {
+    console.log('Setting up event listeners...');
+    
+    // Passcode Enter button
+    const enterBtn = document.getElementById('enterBtn');
     const passcodeInput = document.getElementById('passcodeInput');
-    if (passcodeInput) {
-        passcodeInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkPasscode();
-        });
+    
+    if (enterBtn) {
+        enterBtn.addEventListener('click', checkPasscode);
+        console.log('Enter button listener attached');
     }
+    
+    if (passcodeInput) {
+        passcodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPasscode();
+            }
+        });
+        console.log('Passcode input listener attached');
+    }
+    
+    // Admin toggle
+    const adminToggle = document.getElementById('adminToggle');
+    if (adminToggle) {
+        adminToggle.addEventListener('click', toggleAdmin);
+    }
+    
+    // Close admin
+    const closeAdmin = document.querySelector('.close-admin');
+    if (closeAdmin) {
+        closeAdmin.addEventListener('click', toggleAdmin);
+    }
+    
+    // Save button
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveAdminChanges);
+    }
+    
+    // Logout button
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logoutAdmin);
+    }
+    
+    // Test music button
+    const testMusicBtn = document.getElementById('testMusicBtn');
+    if (testMusicBtn) {
+        testMusicBtn.addEventListener('click', testMusic);
+    }
+    
+    // Background type selector
+    const adminBgType = document.getElementById('adminBgType');
+    if (adminBgType) {
+        adminBgType.addEventListener('change', updateBgTypeOptions);
+    }
+    
+    console.log('All event listeners setup complete');
 }
 
 // ============ PASSCODE AUTHENTICATION ============
@@ -67,12 +111,16 @@ function checkPasscode() {
     const input = document.getElementById('passcodeInput').value;
     const correctPasscode = localStorage.getItem(STORAGE_KEYS.PASSCODE) || DEFAULT_DATA.passcode;
     
+    console.log('Checking passcode... Input length:', input.length, 'Correct:', correctPasscode);
+    
     if (input === correctPasscode) {
-        document.getElementById('passwordModal').classList.remove('active');
+        console.log('Passcode correct!');
+        document.getElementById('passwordModal').classList.add('hidden');
         document.getElementById('mainContent').classList.remove('hidden');
         document.getElementById('passcodeInput').value = '';
         sessionStorage.setItem('authenticated', 'true');
     } else {
+        console.log('Passcode incorrect');
         document.getElementById('errorMessage').textContent = '❌ Incorrect passcode. Try again!';
         document.getElementById('passcodeInput').value = '';
     }
@@ -81,18 +129,23 @@ function checkPasscode() {
 // ============ STORY CONTENT ============
 function displayStoryContent() {
     const storyContent = document.getElementById('storyContent');
+    if (!storyContent) return;
+    
     const title = localStorage.getItem(STORAGE_KEYS.STORY_TITLE) || DEFAULT_DATA.storyTitle;
     const text = localStorage.getItem(STORAGE_KEYS.STORY_TEXT) || DEFAULT_DATA.storyText;
     const images = JSON.parse(localStorage.getItem(STORAGE_KEYS.STORY_IMAGES)) || DEFAULT_DATA.storyImages;
     
-    document.getElementById('storyTitle').textContent = title;
+    const titleEl = document.getElementById('storyTitle');
+    if (titleEl) {
+        titleEl.textContent = title;
+    }
     
     storyContent.innerHTML = '';
     
     // Parse text by || separator
     const paragraphs = text.split('||');
     
-    paragraphs.forEach((paragraph, index) => {
+    paragraphs.forEach((paragraph) => {
         const block = document.createElement('div');
         block.className = 'story-block';
         block.innerHTML = paragraph
@@ -103,12 +156,12 @@ function displayStoryContent() {
     });
     
     // Add images
-    if (images.length > 0) {
+    if (images && images.length > 0) {
         const imageContainer = document.createElement('div');
         imageContainer.className = 'story-images';
         
         images.forEach(imgUrl => {
-            if (imgUrl.trim()) {
+            if (imgUrl && imgUrl.trim()) {
                 const imgDiv = document.createElement('div');
                 imgDiv.className = 'story-image';
                 imgDiv.innerHTML = `<img src="${imgUrl}" alt="Love story" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Error'">`;
@@ -116,7 +169,9 @@ function displayStoryContent() {
             }
         });
         
-        storyContent.appendChild(imageContainer);
+        if (imageContainer.children.length > 0) {
+            storyContent.appendChild(imageContainer);
+        }
     }
 }
 
@@ -126,8 +181,10 @@ function startCountdown() {
     const dateStr = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_DATE) || DEFAULT_DATA.countdownDate;
     const message = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_MESSAGE) || DEFAULT_DATA.countdownMessage;
     
-    document.getElementById('countdownTitle').textContent = title;
-    document.getElementById('countdownMessage').textContent = '';
+    const countdownTitle = document.getElementById('countdownTitle');
+    if (countdownTitle) {
+        countdownTitle.textContent = title;
+    }
     
     const targetDate = new Date(dateStr).getTime();
     
@@ -135,12 +192,18 @@ function startCountdown() {
         const now = new Date().getTime();
         const distance = targetDate - now;
         
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        const messageEl = document.getElementById('countdownMessage');
+        
         if (distance < 0) {
-            document.getElementById('days').textContent = '0';
-            document.getElementById('hours').textContent = '0';
-            document.getElementById('minutes').textContent = '0';
-            document.getElementById('seconds').textContent = '0';
-            document.getElementById('countdownMessage').textContent = message;
+            if (daysEl) daysEl.textContent = '0';
+            if (hoursEl) hoursEl.textContent = '0';
+            if (minutesEl) minutesEl.textContent = '0';
+            if (secondsEl) secondsEl.textContent = '0';
+            if (messageEl) messageEl.textContent = message;
             return;
         }
         
@@ -149,10 +212,10 @@ function startCountdown() {
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
         
-        document.getElementById('days').textContent = days;
-        document.getElementById('hours').textContent = hours;
-        document.getElementById('minutes').textContent = minutes;
-        document.getElementById('seconds').textContent = seconds;
+        if (daysEl) daysEl.textContent = days;
+        if (hoursEl) hoursEl.textContent = hours;
+        if (minutesEl) minutesEl.textContent = minutes;
+        if (secondsEl) secondsEl.textContent = seconds;
     }
     
     updateCountdown();
@@ -162,9 +225,10 @@ function startCountdown() {
 // ============ BACKGROUND ============
 function setBackground() {
     const bgType = localStorage.getItem(STORAGE_KEYS.BG_TYPE) || DEFAULT_DATA.bgType;
-    const bgContainer = document.getElementById('backgroundContainer');
     const bgImage = document.getElementById('bgImage');
     const bgVideo = document.getElementById('bgVideo');
+    
+    if (!bgImage || !bgVideo) return;
     
     // Remove existing styling
     bgImage.style.backgroundImage = '';
@@ -198,6 +262,8 @@ function setupParticles() {
     const particlesEnabled = localStorage.getItem(STORAGE_KEYS.PARTICLES_ENABLED) !== 'false';
     const container = document.getElementById('particles');
     
+    if (!container) return;
+    
     container.innerHTML = '';
     
     if (!particlesEnabled) return;
@@ -223,7 +289,7 @@ function setupParticles() {
 function playMusic() {
     const musicUrl = localStorage.getItem(STORAGE_KEYS.MUSIC_URL) || '';
     const audio = document.getElementById('bgMusic');
-    if (musicUrl) {
+    if (audio && musicUrl) {
         audio.src = musicUrl;
         audio.play().catch(() => {
             console.log('Auto-play prevented. User interaction required.');
@@ -263,64 +329,97 @@ function toggleAdmin() {
 }
 
 function loadAdminPanel() {
-    document.getElementById('adminTitle').value = localStorage.getItem(STORAGE_KEYS.STORY_TITLE) || DEFAULT_DATA.storyTitle;
-    document.getElementById('adminStoryText').value = localStorage.getItem(STORAGE_KEYS.STORY_TEXT) || DEFAULT_DATA.storyText;
-    document.getElementById('adminImages').value = (JSON.parse(localStorage.getItem(STORAGE_KEYS.STORY_IMAGES)) || DEFAULT_DATA.storyImages).join('\n');
+    const adminTitle = document.getElementById('adminTitle');
+    const adminStoryText = document.getElementById('adminStoryText');
+    const adminImages = document.getElementById('adminImages');
+    const adminCountdownTitle = document.getElementById('adminCountdownTitle');
+    const adminTargetDate = document.getElementById('adminTargetDate');
+    const adminCountdownMessage = document.getElementById('adminCountdownMessage');
+    const adminBgType = document.getElementById('adminBgType');
+    const adminBgColor = document.getElementById('adminBgColor');
+    const adminBgImage = document.getElementById('adminBgImage');
+    const adminBgVideo = document.getElementById('adminBgVideo');
+    const adminBgGradient = document.getElementById('adminBgGradient');
+    const adminParticles = document.getElementById('adminParticles');
+    const adminMusicUrl = document.getElementById('adminMusicUrl');
     
-    document.getElementById('adminCountdownTitle').value = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_TITLE) || DEFAULT_DATA.countdownTitle;
-    document.getElementById('adminTargetDate').value = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_DATE) || DEFAULT_DATA.countdownDate;
-    document.getElementById('adminCountdownMessage').value = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_MESSAGE) || DEFAULT_DATA.countdownMessage;
+    if (adminTitle) adminTitle.value = localStorage.getItem(STORAGE_KEYS.STORY_TITLE) || DEFAULT_DATA.storyTitle;
+    if (adminStoryText) adminStoryText.value = localStorage.getItem(STORAGE_KEYS.STORY_TEXT) || DEFAULT_DATA.storyText;
+    if (adminImages) adminImages.value = (JSON.parse(localStorage.getItem(STORAGE_KEYS.STORY_IMAGES)) || DEFAULT_DATA.storyImages).join('\n');
     
-    document.getElementById('adminBgType').value = localStorage.getItem(STORAGE_KEYS.BG_TYPE) || DEFAULT_DATA.bgType;
-    document.getElementById('adminBgColor').value = localStorage.getItem(STORAGE_KEYS.BG_COLOR) || DEFAULT_DATA.bgColor;
-    document.getElementById('adminBgImage').value = localStorage.getItem(STORAGE_KEYS.BG_IMAGE) || '';
-    document.getElementById('adminBgVideo').value = localStorage.getItem(STORAGE_KEYS.BG_VIDEO) || '';
-    document.getElementById('adminBgGradient').value = localStorage.getItem(STORAGE_KEYS.BG_GRADIENT) || DEFAULT_DATA.bgGradient;
+    if (adminCountdownTitle) adminCountdownTitle.value = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_TITLE) || DEFAULT_DATA.countdownTitle;
+    if (adminTargetDate) adminTargetDate.value = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_DATE) || DEFAULT_DATA.countdownDate;
+    if (adminCountdownMessage) adminCountdownMessage.value = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_MESSAGE) || DEFAULT_DATA.countdownMessage;
     
-    document.getElementById('adminParticles').checked = localStorage.getItem(STORAGE_KEYS.PARTICLES_ENABLED) !== 'false';
-    document.getElementById('adminMusicUrl').value = localStorage.getItem(STORAGE_KEYS.MUSIC_URL) || '';
+    if (adminBgType) adminBgType.value = localStorage.getItem(STORAGE_KEYS.BG_TYPE) || DEFAULT_DATA.bgType;
+    if (adminBgColor) adminBgColor.value = localStorage.getItem(STORAGE_KEYS.BG_COLOR) || DEFAULT_DATA.bgColor;
+    if (adminBgImage) adminBgImage.value = localStorage.getItem(STORAGE_KEYS.BG_IMAGE) || '';
+    if (adminBgVideo) adminBgVideo.value = localStorage.getItem(STORAGE_KEYS.BG_VIDEO) || '';
+    if (adminBgGradient) adminBgGradient.value = localStorage.getItem(STORAGE_KEYS.BG_GRADIENT) || DEFAULT_DATA.bgGradient;
+    
+    if (adminParticles) adminParticles.checked = localStorage.getItem(STORAGE_KEYS.PARTICLES_ENABLED) !== 'false';
+    if (adminMusicUrl) adminMusicUrl.value = localStorage.getItem(STORAGE_KEYS.MUSIC_URL) || '';
     
     updateBgTypeOptions();
 }
 
 function updateBgTypeOptions() {
     const bgType = document.getElementById('adminBgType').value;
-    document.getElementById('colorOption').classList.toggle('active', bgType === 'color');
-    document.getElementById('imageOption').classList.toggle('active', bgType === 'image');
-    document.getElementById('videoOption').classList.toggle('active', bgType === 'video');
-    document.getElementById('gradientOption').classList.toggle('active', bgType === 'gradient');
+    const colorOption = document.getElementById('colorOption');
+    const imageOption = document.getElementById('imageOption');
+    const videoOption = document.getElementById('videoOption');
+    const gradientOption = document.getElementById('gradientOption');
+    
+    if (colorOption) colorOption.classList.toggle('hidden', bgType !== 'color');
+    if (imageOption) imageOption.classList.toggle('hidden', bgType !== 'image');
+    if (videoOption) videoOption.classList.toggle('hidden', bgType !== 'video');
+    if (gradientOption) gradientOption.classList.toggle('hidden', bgType !== 'gradient');
 }
 
 function saveAdminChanges() {
     try {
-        localStorage.setItem(STORAGE_KEYS.STORY_TITLE, document.getElementById('adminTitle').value);
-        localStorage.setItem(STORAGE_KEYS.STORY_TEXT, document.getElementById('adminStoryText').value);
+        const adminTitle = document.getElementById('adminTitle');
+        const adminStoryText = document.getElementById('adminStoryText');
+        const adminImages = document.getElementById('adminImages');
+        const adminCountdownTitle = document.getElementById('adminCountdownTitle');
+        const adminTargetDate = document.getElementById('adminTargetDate');
+        const adminCountdownMessage = document.getElementById('adminCountdownMessage');
+        const adminBgType = document.getElementById('adminBgType');
+        const adminBgColor = document.getElementById('adminBgColor');
+        const adminBgImage = document.getElementById('adminBgImage');
+        const adminBgVideo = document.getElementById('adminBgVideo');
+        const adminBgGradient = document.getElementById('adminBgGradient');
+        const adminParticles = document.getElementById('adminParticles');
+        const adminMusicUrl = document.getElementById('adminMusicUrl');
+        const adminPasscode = document.getElementById('adminPasscode');
         
-        const images = document.getElementById('adminImages').value.split('\n').filter(url => url.trim());
-        localStorage.setItem(STORAGE_KEYS.STORY_IMAGES, JSON.stringify(images));
+        if (adminTitle) localStorage.setItem(STORAGE_KEYS.STORY_TITLE, adminTitle.value);
+        if (adminStoryText) localStorage.setItem(STORAGE_KEYS.STORY_TEXT, adminStoryText.value);
         
-        localStorage.setItem(STORAGE_KEYS.COUNTDOWN_TITLE, document.getElementById('adminCountdownTitle').value);
-        localStorage.setItem(STORAGE_KEYS.COUNTDOWN_DATE, document.getElementById('adminTargetDate').value);
-        localStorage.setItem(STORAGE_KEYS.COUNTDOWN_MESSAGE, document.getElementById('adminCountdownMessage').value);
+        if (adminImages) {
+            const images = adminImages.value.split('\n').filter(url => url.trim());
+            localStorage.setItem(STORAGE_KEYS.STORY_IMAGES, JSON.stringify(images));
+        }
         
-        localStorage.setItem(STORAGE_KEYS.BG_TYPE, document.getElementById('adminBgType').value);
-        localStorage.setItem(STORAGE_KEYS.BG_COLOR, document.getElementById('adminBgColor').value);
-        localStorage.setItem(STORAGE_KEYS.BG_IMAGE, document.getElementById('adminBgImage').value);
-        localStorage.setItem(STORAGE_KEYS.BG_VIDEO, document.getElementById('adminBgVideo').value);
-        localStorage.setItem(STORAGE_KEYS.BG_GRADIENT, document.getElementById('adminBgGradient').value);
+        if (adminCountdownTitle) localStorage.setItem(STORAGE_KEYS.COUNTDOWN_TITLE, adminCountdownTitle.value);
+        if (adminTargetDate) localStorage.setItem(STORAGE_KEYS.COUNTDOWN_DATE, adminTargetDate.value);
+        if (adminCountdownMessage) localStorage.setItem(STORAGE_KEYS.COUNTDOWN_MESSAGE, adminCountdownMessage.value);
         
-        localStorage.setItem(STORAGE_KEYS.PARTICLES_ENABLED, document.getElementById('adminParticles').checked);
-        localStorage.setItem(STORAGE_KEYS.MUSIC_URL, document.getElementById('adminMusicUrl').value);
+        if (adminBgType) localStorage.setItem(STORAGE_KEYS.BG_TYPE, adminBgType.value);
+        if (adminBgColor) localStorage.setItem(STORAGE_KEYS.BG_COLOR, adminBgColor.value);
+        if (adminBgImage) localStorage.setItem(STORAGE_KEYS.BG_IMAGE, adminBgImage.value);
+        if (adminBgVideo) localStorage.setItem(STORAGE_KEYS.BG_VIDEO, adminBgVideo.value);
+        if (adminBgGradient) localStorage.setItem(STORAGE_KEYS.BG_GRADIENT, adminBgGradient.value);
         
-        const newPasscode = document.getElementById('adminPasscode').value;
-        if (newPasscode) {
-            localStorage.setItem(STORAGE_KEYS.PASSCODE, newPasscode);
-            document.getElementById('adminPasscode').value = '';
+        if (adminParticles) localStorage.setItem(STORAGE_KEYS.PARTICLES_ENABLED, adminParticles.checked);
+        if (adminMusicUrl) localStorage.setItem(STORAGE_KEYS.MUSIC_URL, adminMusicUrl.value);
+        
+        if (adminPasscode && adminPasscode.value) {
+            localStorage.setItem(STORAGE_KEYS.PASSCODE, adminPasscode.value);
+            adminPasscode.value = '';
         }
         
         alert('✅ All changes saved successfully!');
-        
-        // Refresh the page to apply changes
         location.reload();
     } catch (error) {
         alert('Error saving changes: ' + error.message);
@@ -329,19 +428,20 @@ function saveAdminChanges() {
 
 function logoutAdmin() {
     sessionStorage.removeItem('authenticated');
-    document.getElementById('adminPanel').classList.add('hidden');
+    const adminPanel = document.getElementById('adminPanel');
+    if (adminPanel) {
+        adminPanel.classList.add('hidden');
+    }
     alert('Logged out. Please refresh the page.');
 }
 
 function loadAllData() {
-    // This ensures defaults are set if not in storage
+    // Initialize all default values in localStorage if not present
     for (const key in DEFAULT_DATA) {
-        if (!localStorage.getItem(STORAGE_KEYS[key.toUpperCase()])) {
-            const storageKey = Object.keys(STORAGE_KEYS).find(k => k.toLowerCase() === key.toLowerCase());
-            if (storageKey) {
-                const value = DEFAULT_DATA[key];
-                localStorage.setItem(STORAGE_KEYS[storageKey], typeof value === 'string' ? value : JSON.stringify(value));
-            }
+        const storageKey = STORAGE_KEYS[key.toUpperCase()];
+        if (storageKey && !localStorage.getItem(storageKey)) {
+            const value = DEFAULT_DATA[key];
+            localStorage.setItem(storageKey, typeof value === 'string' ? value : JSON.stringify(value));
         }
     }
 }
