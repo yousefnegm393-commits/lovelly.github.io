@@ -18,7 +18,7 @@ const STORAGE_KEYS = {
 
 // ============ DEFAULT DATA ============
 const DEFAULT_DATA = {
-    passcode: '1234',
+    passcode: '2662009',
     storyTitle: 'Our Love Story 💕',
     storyText: 'Every love story is beautiful,|but ours is my favorite.||From the moment I met you, I knew you were special.',
     storyImages: ['https://via.placeholder.com/400x300?text=Us', 'https://via.placeholder.com/400x300?text=Together'],
