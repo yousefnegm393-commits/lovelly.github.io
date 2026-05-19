@@ -1,3 +1,18 @@
+// ============ STORAGE KEYS ============
+const STORAGE_KEYS = {
+    PASSCODE: 'love_story_passcode',
+    STORY_TITLE: 'story_title',
+    STORY_TEXT: 'story_text',
+    STORY_IMAGES: 'story_images',
+    COUNTDOWN_TITLE: 'countdown_title',
+    COUNTDOWN_DATE: 'countdown_date',
+    COUNTDOWN_MESSAGE: 'countdown_message',
+    BG_TYPE: 'bg_type',
+    BG_COLOR: 'bg_color',
+    BG_IMAGE: 'bg_image',
+    BG_VIDEO: 'bg_video',
+    BG_GRADIENT: 'bg_gradient',
+    PARTICLES_ENABLED: 'particles_enabled',
     MUSIC_URL: 'music_url',
     ADMIN_AUTH: 'admin_auth'
 };
@@ -34,6 +49,17 @@ function initializeApp() {
         playMusic();
     }
     setupParticles();
+    setupEventListeners();
+}
+
+// ============ EVENT LISTENERS ============
+function setupEventListeners() {
+    const passcodeInput = document.getElementById('passcodeInput');
+    if (passcodeInput) {
+        passcodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkPasscode();
+        });
+    }
 }
 
 // ============ PASSCODE AUTHENTICATION ============
@@ -51,10 +77,6 @@ function checkPasscode() {
         document.getElementById('passcodeInput').value = '';
     }
 }
-
-document.getElementById('passcodeInput')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') checkPasscode();
-});
 
 // ============ STORY CONTENT ============
 function displayStoryContent() {
