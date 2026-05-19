@@ -25,7 +25,6 @@
 
         <!-- Music Player -->
         <div id="musicPlayer" class="music-player" style="display: none;">
-            <audio id="bgMusic"></audio>
             <button id="musicPlayBtn" onclick="toggleMusic()">▶️</button>
             <span>Music Player</span>
         </div>
@@ -138,8 +137,24 @@
 
         <div class="admin-section">
             <h3>🎵 Music Settings</h3>
-            <label>Music URL:</label>
-            <input type="text" id="adminMusicUrl" placeholder="https://music.com/song.mp3">
+            <label>Music Source Type:</label>
+            <select id="adminMusicType" onchange="updateMusicTypeOptions()">
+                <option value="youtube">YouTube URL</option>
+                <option value="audio">Audio File (MP3/WAV)</option>
+            </select>
+
+            <div id="youtubeOption">
+                <label>YouTube Video URL:</label>
+                <input type="text" id="adminMusicUrl" placeholder="https://www.youtube.com/watch?v=...">
+                <p class="music-hint">Example: https://www.youtube.com/watch?v=dQw4w9WgXcQ</p>
+            </div>
+
+            <div id="audioOption" class="hidden">
+                <label>Audio File URL (MP3/WAV/OGG):</label>
+                <input type="text" id="adminAudioUrl" placeholder="https://music.com/song.mp3">
+                <p class="music-hint">Supports: MP3, WAV, OGG, WebM</p>
+            </div>
+
             <button onclick="testMusic()" class="test-btn">🎵 Test Music</button>
         </div>
 
@@ -147,8 +162,8 @@
         <button class="logout-btn" onclick="logoutAdmin()">🚪 Logout</button>
     </div>
 
-    <!-- Audio Element -->
-    <audio id="bgMusic" loop></audio>
+    <!-- Hidden YouTube IFrame Container -->
+    <div id="youtubePlayerContainer" style="display: none;"></div>
 
     <script src="script.js"></script>
 </body>
