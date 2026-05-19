@@ -18,13 +18,13 @@ const STORAGE_KEYS = {
 
 // ============ DEFAULT DATA ============
 const DEFAULT_DATA = {
-    passcode: '2662009',
+    passcode: '1234',
     storyTitle: 'Our Love Story 💕',
     storyText: 'Every love story is beautiful,|but ours is my favorite.||From the moment I met you, I knew you were special.',
     storyImages: ['https://via.placeholder.com/400x300?text=Us', 'https://via.placeholder.com/400x300?text=Together'],
-    countdownTitle: 'Days Until Our Special Day 💑',
-    countdownDate: new Date(2026, 3, 28).toISOString().split('T')[0],
-    countdownMessage: '❤️ Our special day is here! ❤️',
+    countdownTitle: 'Together Since 💑',
+    countdownDate: new Date(2024, 0, 1).toISOString().split('T')[0], // Default to Jan 1, 2024
+    countdownMessage: '❤️ Days together and counting! ❤️',
     bgType: 'color',
     bgColor: '#1a1a2e',
     bgImage: '',
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadAllData();
     displayStoryContent();
     setBackground();
-    startCountdown();
+    startCountup();
     setupParticles();
     setupAllEventListeners();
 });
@@ -111,7 +111,7 @@ function checkPasscode() {
     const input = document.getElementById('passcodeInput').value;
     const correctPasscode = localStorage.getItem(STORAGE_KEYS.PASSCODE) || DEFAULT_DATA.passcode;
     
-    console.log('Checking passcode... Input length:', input.length, 'Correct:', correctPasscode);
+    console.log('Checking passcode...');
     
     if (input === correctPasscode) {
         console.log('Passcode correct!');
@@ -175,8 +175,8 @@ function displayStoryContent() {
     }
 }
 
-// ============ COUNTDOWN ============
-function startCountdown() {
+// ============ COUNTUP (Instead of Countdown) ============
+function startCountup() {
     const title = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_TITLE) || DEFAULT_DATA.countdownTitle;
     const dateStr = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_DATE) || DEFAULT_DATA.countdownDate;
     const message = localStorage.getItem(STORAGE_KEYS.COUNTDOWN_MESSAGE) || DEFAULT_DATA.countdownMessage;
@@ -186,11 +186,11 @@ function startCountdown() {
         countdownTitle.textContent = title;
     }
     
-    const targetDate = new Date(dateStr).getTime();
+    const startDate = new Date(dateStr).getTime();
     
-    function updateCountdown() {
+    function updateCountup() {
         const now = new Date().getTime();
-        const distance = targetDate - now;
+        const distance = now - startDate;
         
         const daysEl = document.getElementById('days');
         const hoursEl = document.getElementById('hours');
@@ -203,7 +203,6 @@ function startCountdown() {
             if (hoursEl) hoursEl.textContent = '0';
             if (minutesEl) minutesEl.textContent = '0';
             if (secondsEl) secondsEl.textContent = '0';
-            if (messageEl) messageEl.textContent = message;
             return;
         }
         
@@ -216,10 +215,11 @@ function startCountdown() {
         if (hoursEl) hoursEl.textContent = hours;
         if (minutesEl) minutesEl.textContent = minutes;
         if (secondsEl) secondsEl.textContent = seconds;
+        if (messageEl) messageEl.textContent = message;
     }
     
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+    updateCountup();
+    setInterval(updateCountup, 1000);
 }
 
 // ============ BACKGROUND ============
