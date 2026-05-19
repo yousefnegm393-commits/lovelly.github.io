@@ -8,19 +8,27 @@
 </head>
 <body>
     <!-- Password Modal -->
-    <div id="passwordModal" class="modal">
+    <div id="passwordModal" class="modal active">
         <div class="modal-content password-modal">
             <h2>🔐 Enter Passcode</h2>
             <input type="password" id="passcodeInput" placeholder="Enter passcode" autocomplete="off">
-            <button id="enterBtn" type="button">Enter</button>
+            <button onclick="checkPasscode()">Enter</button>
             <p id="errorMessage" class="error-message"></p>
+            <p class="hint-text">Admin: 2152008 | Visitor: 2662009</p>
         </div>
     </div>
 
     <!-- Main Love Story Page -->
     <div id="mainContent" class="hidden">
         <!-- Admin Panel Button -->
-        <button id="adminToggle" class="admin-toggle" type="button">⚙️ Admin</button>
+        <button id="adminToggle" class="admin-toggle" onclick="toggleAdmin()" style="display: none;">⚙️ Admin</button>
+
+        <!-- Music Player -->
+        <div id="musicPlayer" class="music-player" style="display: none;">
+            <audio id="bgMusic"></audio>
+            <button id="musicPlayBtn" onclick="toggleMusic()">▶️</button>
+            <span>Music Player</span>
+        </div>
 
         <!-- Background Container -->
         <div id="backgroundContainer" class="background-container">
@@ -67,8 +75,8 @@
 
     <!-- Admin Panel -->
     <div id="adminPanel" class="admin-panel hidden">
-        <button class="close-admin" type="button">✕</button>
-        <h2>Admin Panel</h2>
+        <button class="close-admin" onclick="toggleAdmin()">✕</button>
+        <h2>⚙️ Admin Panel</h2>
         
         <div class="admin-section">
             <h3>📝 Story Content</h3>
@@ -97,7 +105,7 @@
         <div class="admin-section">
             <h3>🎨 Background & Effects</h3>
             <label>Background Type:</label>
-            <select id="adminBgType">
+            <select id="adminBgType" onchange="updateBgTypeOptions()">
                 <option value="color">Solid Color</option>
                 <option value="image">Image</option>
                 <option value="video">Video</option>
@@ -126,20 +134,17 @@
 
             <label>Enable Particles:</label>
             <input type="checkbox" id="adminParticles" checked>
-
-            <label>Music URL:</label>
-            <input type="text" id="adminMusicUrl" placeholder="https://music.com/song.mp3">
-            <button id="testMusicBtn" type="button">🎵 Test Music</button>
         </div>
 
         <div class="admin-section">
-            <h3>🔒 Security</h3>
-            <label>Passcode:</label>
-            <input type="password" id="adminPasscode" placeholder="Enter new passcode">
+            <h3>🎵 Music Settings</h3>
+            <label>Music URL:</label>
+            <input type="text" id="adminMusicUrl" placeholder="https://music.com/song.mp3">
+            <button onclick="testMusic()" class="test-btn">🎵 Test Music</button>
         </div>
 
-        <button id="saveBtn" class="save-btn" type="button">💾 Save All Changes</button>
-        <button id="logoutBtn" class="logout-btn" type="button">🚪 Logout</button>
+        <button class="save-btn" onclick="saveAdminChanges()">💾 Save All Changes</button>
+        <button class="logout-btn" onclick="logoutAdmin()">🚪 Logout</button>
     </div>
 
     <!-- Audio Element -->
