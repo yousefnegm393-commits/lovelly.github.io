@@ -23,7 +23,7 @@ const DEFAULT_DATA = {
     storyText: 'Every love story is beautiful,|but ours is my favorite.||From the moment I met you, I knew you were special.',
     storyImages: ['https://via.placeholder.com/400x300?text=Us', 'https://via.placeholder.com/400x300?text=Together'],
     countdownTitle: 'Days Until Our Special Day 💑',
-    countdownDate: new Date(2025, 11, 31).toISOString().split('T')[0],
+    countdownDate: new Date(2026, 3, 28).toISOString().split('T')[0],
     countdownMessage: '❤️ Our special day is here! ❤️',
     bgType: 'color',
     bgColor: '#1a1a2e',
@@ -40,7 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
     loadAllData();
     displayStoryContent();
     setBackground();
-    startCountdown();
+    const distance =
+        now -
+        countdowndate;
     setupParticles();
     setupAllEventListeners();
 });
