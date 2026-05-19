@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Love Story</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Password Modal -->
+    <div id="passwordModal" class="modal active">
+        <div class="modal-content password-modal">
+            <h2>🔐 Enter Passcode</h2>
+            <input type="password" id="passcodeInput" placeholder="Enter passcode" autocomplete="off">
+            <button onclick="checkPasscode()">Enter</button>
+            <p id="errorMessage" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- Main Love Story Page -->
+    <div id="mainContent" class="hidden">
+        <!-- Admin Panel Button -->
+        <button id="adminToggle" class="admin-toggle" onclick="toggleAdmin()">⚙️ Admin</button>
+
+        <!-- Background Container -->
+        <div id="backgroundContainer" class="background-container">
+            <video id="bgVideo" autoplay muted loop playsinline></video>
+            <div id="bgImage" class="bg-image"></div>
+            <div id="particles" class="particles"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container">
+            <div class="content-wrapper">
+                <!-- Love Story Text & Images Section -->
+                <div class="story-section">
+                    <h1 id="storyTitle">Our Love Story</h1>
+                    <div id="storyContent" class="story-content"></div>
+                </div>
+
+                <!-- Countdown Section -->
+                <div class="countdown-section">
+                    <h2 id="countdownTitle">Days Until Our Special Day</h2>
+                    <div class="countdown">
+                        <div class="countdown-item">
+                            <span id="days" class="countdown-number">0</span>
+                            <span class="countdown-label">Days</span>
+                        </div>
+                        <div class="countdown-item">
+                            <span id="hours" class="countdown-number">0</span>
+                            <span class="countdown-label">Hours</span>
+                        </div>
+                        <div class="countdown-item">
+                            <span id="minutes" class="countdown-number">0</span>
+                            <span class="countdown-label">Minutes</span>
+                        </div>
+                        <div class="countdown-item">
+                            <span id="seconds" class="countdown-number">0</span>
+                            <span class="countdown-label">Seconds</span>
+                        </div>
+                    </div>
+                    <p id="countdownMessage" class="countdown-message"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel hidden">
+        <button class="close-admin" onclick="toggleAdmin()">✕</button>
+        <h2>Admin Panel</h2>
+        
+        <div class="admin-section">
+            <h3>📝 Story Content</h3>
+            <label>Story Title:</label>
+            <input type="text" id="adminTitle" placeholder="Enter title">
+            
+            <label>Story Text:</label>
+            <textarea id="adminStoryText" placeholder="Enter story text (use || to separate paragraphs)"></textarea>
+            
+            <label>Story Images (one URL per line):</label>
+            <textarea id="adminImages" placeholder="https://image1.com\nhttps://image2.com"></textarea>
+        </div>
+
+        <div class="admin-section">
+            <h3>⏰ Countdown Settings</h3>
+            <label>Countdown Title:</label>
+            <input type="text" id="adminCountdownTitle" placeholder="Days Until Our Special Day">
+            
+            <label>Target Date (YYYY-MM-DD):</label>
+            <input type="date" id="adminTargetDate">
+            
+            <label>Countdown Message:</label>
+            <input type="text" id="adminCountdownMessage" placeholder="Enter message when countdown ends">
+        </div>
+
+        <div class="admin-section">
+            <h3>🎨 Background & Effects</h3>
+            <label>Background Type:</label>
+            <select id="adminBgType" onchange="updateBgTypeOptions()">
+                <option value="color">Solid Color</option>
+                <option value="image">Image</option>
+                <option value="video">Video</option>
+                <option value="gradient">Gradient</option>
+            </select>
+
+            <div id="colorOption" class="bg-option">
+                <label>Color:</label>
+                <input type="color" id="adminBgColor" value="#1a1a2e">
+            </div>
+
+            <div id="imageOption" class="bg-option hidden">
+                <label>Image URL:</label>
+                <input type="text" id="adminBgImage" placeholder="https://image.com/bg.jpg">
+            </div>
+
+            <div id="videoOption" class="bg-option hidden">
+                <label>Video URL:</label>
+                <input type="text" id="adminBgVideo" placeholder="https://video.com/bg.mp4">
+            </div>
+
+            <div id="gradientOption" class="bg-option hidden">
+                <label>Gradient (e.g., to right, #ff0000, #0000ff):</label>
+                <input type="text" id="adminBgGradient" placeholder="to right, #ff0000, #0000ff">
+            </div>
+
+            <label>Enable Particles:</label>
+            <input type="checkbox" id="adminParticles" checked>
+
+            <label>Music URL:</label>
+            <input type="text" id="adminMusicUrl" placeholder="https://music.com/song.mp3">
+            <button onclick="testMusic()">🎵 Test Music</button>
+        </div>
+
+        <div class="admin-section">
+            <h3>🔒 Security</h3>
+            <label>Passcode:</label>
+            <input type="password" id="adminPasscode" placeholder="Enter new passcode">
+        </div>
+
+        <button class="save-btn" onclick="saveAdminChanges()">💾 Save All Changes</button>
+        <button class="logout-btn" onclick="logoutAdmin()">🚪 Logout</button>
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="bgMusic" loop></audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
