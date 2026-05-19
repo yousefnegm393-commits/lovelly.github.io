@@ -14,7 +14,9 @@ const STORAGE_KEYS = {
     BG_VIDEO: 'bg_video',
     BG_GRADIENT: 'bg_gradient',
     PARTICLES_ENABLED: 'particles_enabled',
+    MUSIC_TYPE: 'music_type',
     MUSIC_URL: 'music_url',
+    AUDIO_URL: 'audio_url',
     ADMIN_AUTH: 'admin_auth',
     USER_TYPE: 'user_type'
 };
@@ -35,8 +37,13 @@ const DEFAULT_DATA = {
     bgVideo: '',
     bgGradient: 'to right, #667eea, #764ba2',
     particlesEnabled: true,
-    musicUrl: ''
+    musicType: 'youtube',
+    musicUrl: '',
+    audioUrl: ''
 };
+
+let youtubePlayer = null;
+let currentMusicType = 'youtube';
 
 // ============ INITIALIZATION ============
 window.addEventListener('load', () => {
@@ -48,9 +55,7 @@ function initializeApp() {
     displayStoryContent();
     setBackground();
     startCountup();
-    if (DEFAULT_DATA.musicUrl) {
-        playMusic();
-    }
+    loadMusicPlayer();
     setupParticles();
     setupEventListeners();
 }
@@ -79,7 +84,6 @@ function checkPasscode() {
         sessionStorage.setItem('authenticated', 'true');
         sessionStorage.setItem('userType', 'admin');
         showAdminButton();
-        loadMusicPlayer();
     } else if (input === visitorPasscode) {
         // Visitor Login
         document.getElementById('passwordModal').classList.remove('active');
@@ -88,7 +92,6 @@ function checkPasscode() {
         sessionStorage.setItem('authenticated', 'true');
         sessionStorage.setItem('userType', 'visitor');
         hideAdminButton();
-        loadMusicPlayer();
     } else {
         document.getElementById('errorMessage').textContent = '❌ Incorrect passcode. Try again!';
         document.getElementById('passcodeInput').value = '';
@@ -245,55 +248,147 @@ function setupParticles() {
     }
 }
 
-// ============ MUSIC ============
-function playMusic() {
-    const musicUrl = localStorage.getItem(STORAGE_KEYS.MUSIC_URL) || '';
-    const audio = document.getElementById('bgMusic');
-    if (musicUrl) {
-        audio.src = musicUrl;
-        audio.play().catch(() => {
-            console.log('Auto-play prevented. User interaction required.');
-        });
-    }
-}
-
-function testMusic() {
-    const musicUrl = document.getElementById('adminMusicUrl').value;
-    const audio = document.getElementById('bgMusic');
-    if (musicUrl) {
-        audio.src = musicUrl;
-        audio.play().catch((e) => {
-            alert('Failed to play music. Check the URL.');
-        });
-    } else {
-        alert('Please enter a music URL.');
-    }
+// ============ MUSIC PLAYER ============
+function getYoutubeVideoId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
 }
 
 function loadMusicPlayer() {
-    const musicUrl = localStorage.getItem(STORAGE_KEYS.MUSIC_URL) || '';
     const musicPlayer = document.getElementById('musicPlayer');
+    const musicType = localStorage.getItem(STORAGE_KEYS.MUSIC_TYPE) || DEFAULT_DATA.musicType;
+    currentMusicType = musicType;
     
-    if (musicUrl && musicPlayer) {
-        musicPlayer.style.display = 'flex';
-        const audioElement = musicPlayer.querySelector('audio');
-        if (audioElement) {
-            audioElement.src = musicUrl;
+    if (musicType === 'youtube') {
+        const youtubeUrl = localStorage.getItem(STORAGE_KEYS.MUSIC_URL) || '';
+        if (youtubeUrl) {
+            const videoId = getYoutubeVideoId(youtubeUrl);
+            if (videoId) {
+                musicPlayer.style.display = 'flex';
+                loadYoutubePlayer(videoId);
+            }
+        }
+    } else if (musicType === 'audio') {
+        const audioUrl = localStorage.getItem(STORAGE_KEYS.AUDIO_URL) || '';
+        if (audioUrl) {
+            musicPlayer.style.display = 'flex';
+            loadAudioPlayer(audioUrl);
         }
     }
 }
 
+function loadYoutubePlayer(videoId) {
+    const container = document.getElementById('youtubePlayerContainer');
+    container.innerHTML = `<iframe id="youtubeIframe" width="100%" height="0" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="display:none;"></iframe>`;
+    
+    // Load YouTube IFrame API
+    if (!window.YT) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+    } else {
+        initYoutubePlayer(videoId);
+    }
+}
+
+function initYoutubePlayer(videoId) {
+    youtubePlayer = new YT.Player('youtubeIframe', {
+        events: {
+            'onReady': onPlayerReady
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    event.target.playVideo();
+}
+
+function loadAudioPlayer(audioUrl) {
+    let audioElement = document.getElementById('bgMusic');
+    if (!audioElement) {
+        audioElement = document.createElement('audio');
+        audioElement.id = 'bgMusic';
+        audioElement.loop = true;
+        document.body.appendChild(audioElement);
+    }
+    audioElement.src = audioUrl;
+    audioElement.play().catch(() => {
+        console.log('Auto-play prevented. User interaction required.');
+    });
+}
+
+function testMusic() {
+    const musicType = document.getElementById('adminMusicType').value;
+    
+    try {
+        if (musicType === 'youtube') {
+            const youtubeUrl = document.getElementById('adminMusicUrl').value;
+            if (!youtubeUrl) {
+                alert('Please enter a YouTube URL.');
+                return;
+            }
+            
+            const videoId = getYoutubeVideoId(youtubeUrl);
+            if (!videoId) {
+                alert('Invalid YouTube URL. Please check and try again.');
+                return;
+            }
+            
+            alert('✅ YouTube URL is valid! Click Save to use it.');
+        } else {
+            const audioUrl = document.getElementById('adminAudioUrl').value;
+            if (!audioUrl) {
+                alert('Please enter an audio file URL.');
+                return;
+            }
+            
+            const audio = new Audio();
+            audio.src = audioUrl;
+            audio.oncanplay = () => {
+                alert('✅ Audio file loaded successfully! Click Save to use it.');
+            };
+            audio.onerror = () => {
+                alert('❌ Failed to load audio file. Check the URL.');
+            };
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
 function toggleMusic() {
-    const audio = document.getElementById('musicPlayer').querySelector('audio');
     const playBtn = document.getElementById('musicPlayBtn');
     
-    if (audio.paused) {
-        audio.play();
-        playBtn.textContent = '⏸️';
+    if (currentMusicType === 'youtube') {
+        if (youtubePlayer && youtubePlayer.getPlayerState) {
+            const state = youtubePlayer.getPlayerState();
+            if (state === 1) { // Playing
+                youtubePlayer.pauseVideo();
+                playBtn.textContent = '▶️';
+            } else {
+                youtubePlayer.playVideo();
+                playBtn.textContent = '⏸️';
+            }
+        }
     } else {
-        audio.pause();
-        playBtn.textContent = '▶️';
+        const audio = document.getElementById('bgMusic');
+        if (audio) {
+            if (audio.paused) {
+                audio.play();
+                playBtn.textContent = '⏸️';
+            } else {
+                audio.pause();
+                playBtn.textContent = '▶️';
+            }
+        }
     }
+}
+
+function updateMusicTypeOptions() {
+    const musicType = document.getElementById('adminMusicType').value;
+    document.getElementById('youtubeOption').classList.toggle('hidden', musicType !== 'youtube');
+    document.getElementById('audioOption').classList.toggle('hidden', musicType !== 'audio');
 }
 
 // ============ ADMIN PANEL ============
@@ -332,9 +427,14 @@ function loadAdminPanel() {
     document.getElementById('adminBgGradient').value = localStorage.getItem(STORAGE_KEYS.BG_GRADIENT) || DEFAULT_DATA.bgGradient;
     
     document.getElementById('adminParticles').checked = localStorage.getItem(STORAGE_KEYS.PARTICLES_ENABLED) !== 'false';
+    
+    const musicType = localStorage.getItem(STORAGE_KEYS.MUSIC_TYPE) || DEFAULT_DATA.musicType;
+    document.getElementById('adminMusicType').value = musicType;
     document.getElementById('adminMusicUrl').value = localStorage.getItem(STORAGE_KEYS.MUSIC_URL) || '';
+    document.getElementById('adminAudioUrl').value = localStorage.getItem(STORAGE_KEYS.AUDIO_URL) || '';
     
     updateBgTypeOptions();
+    updateMusicTypeOptions();
 }
 
 function updateBgTypeOptions() {
@@ -364,11 +464,19 @@ function saveAdminChanges() {
         localStorage.setItem(STORAGE_KEYS.BG_GRADIENT, document.getElementById('adminBgGradient').value);
         
         localStorage.setItem(STORAGE_KEYS.PARTICLES_ENABLED, document.getElementById('adminParticles').checked);
-        localStorage.setItem(STORAGE_KEYS.MUSIC_URL, document.getElementById('adminMusicUrl').value);
+        
+        const musicType = document.getElementById('adminMusicType').value;
+        localStorage.setItem(STORAGE_KEYS.MUSIC_TYPE, musicType);
+        
+        if (musicType === 'youtube') {
+            localStorage.setItem(STORAGE_KEYS.MUSIC_URL, document.getElementById('adminMusicUrl').value);
+            localStorage.removeItem(STORAGE_KEYS.AUDIO_URL);
+        } else {
+            localStorage.setItem(STORAGE_KEYS.AUDIO_URL, document.getElementById('adminAudioUrl').value);
+            localStorage.removeItem(STORAGE_KEYS.MUSIC_URL);
+        }
         
         alert('✅ All changes saved successfully!');
-        
-        // Refresh the page to apply changes
         location.reload();
     } catch (error) {
         alert('Error saving changes: ' + error.message);
