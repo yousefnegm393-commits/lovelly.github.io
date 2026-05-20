@@ -23,7 +23,7 @@ const STORAGE_KEYS = {
 // ============ DEFAULT DATA ============
 const DEFAULT_DATA = {
     passcodeAdmin: '2152008',
-    passcodeVisitor: '2662009',
+    passcodeVisitor: '932009',
     storyTitle: 'Our Love Story 💕',
     storyText: 'Every love story is beautiful,|but ours is my favorite.||From the moment I met you, I knew you were special.',
     pictures: [],
